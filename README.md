@@ -1,3 +1,6 @@
 codespells-runes
 ================
-README text here.
+
+Part of the CodeSpells Authoring Tools.
+
+See: https://codespells.org
