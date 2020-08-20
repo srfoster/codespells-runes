@@ -1,6 +1,9 @@
 #lang at-exp racket
 
-(provide rune-surface-component)
+(provide 
+  store-state
+  restore-state
+  rune-surface-component)
 
 (require "./rune-util.rkt"
 	 webapp/js
@@ -8,10 +11,13 @@
 		    (only-in website
 			     script)))
 
-(define (rune-surface-component lang program)
+(define (rune-surface-component 
+	  #:store-state [store-state store-state]
+	  #:restore-state [restore-state restore-state]
+	  lang program)
   (enclose
    (div
-     id: "rune-container"
+     id: (id 'runeContainer)
      'onmouseleave: (~a (call 'storeState) ";" (call 'compile))
      style: (properties width: "100%" height: 500
 			background-color: "rgba(0,0,0,0.5)"
@@ -24,7 +30,9 @@
        "https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
      ;TODO: Make work with nested program, or syntax...
      ;      Maybe program plus whitespace can be the data we store...
+     #;
      (map (curry id->html lang) program)
+     (typeset-runes-syntax lang program)
      )
    (script
     ([construct (call 'construct)])
@@ -67,8 +75,6 @@
   target.setAttribute('data-x', x)
   target.setAttribute('data-y', y)
 
-
-  
   })
   .on('dragend', function(event){
     console.log(@(call 'compile))
@@ -112,23 +118,27 @@
 })
 
   (function (storeState)
-            @js{
+	    @(store-state (id 'runeContainer))
 
-
-
-  localStorage.setItem("last-program", document.getElementById('rune-container').innerHTML)
-  
-})
+)
 
   (function (restoreState)
-            @js{
-  console.log("RESTORING")
+	    @(restore-state (id 'runeContainer)))
 
+  )))
+
+
+(define (restore-state surface)
+  ;not sure why the id is magically a div element....
+  ; but it sure is nice...
+  @js{
   var prog = localStorage.getItem("last-program") 
 
   if(prog != "")
-    document.getElementById('rune-container').innerHTML = localStorage.getItem("last-program")
+  @surface .innerHTML = localStorage.getItem("last-program")
+  })
 
- 
-})
-  )))
+(define (store-state surface)
+  @js{localStorage.setItem("last-program", @surface .innerHTML) })
+
+

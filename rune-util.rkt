@@ -1,10 +1,15 @@
 #lang at-exp racket
 
 (provide typeset-runes
+	 typeset-runes-syntax
+	 typeset-runes-block
+	 typeset-rune-inline
+
 	 id->html
 
 	 (struct-out image-binding)
 	 (struct-out rune-lang)
+	 append-rune-langs
 	 html-rune
 	 
 	 ;Styling
@@ -15,13 +20,20 @@
 	 )
 
 (define rune-width 
-  (make-parameter 50))
+  (make-parameter 100))
 
 
 ;A path is either a path or an element...
 ;  If path, rendered as img tag, else directly dumped
 (struct image-binding (id path))
 (struct rune-lang (name image-bindings))
+
+(define (append-rune-langs l1 l2
+			   #:name [name 'combined])
+  (rune-lang name
+	     (append
+	       (rune-lang-image-bindings l1)
+	       (rune-lang-image-bindings l2))))
 
 
 (define padding 50)
@@ -52,6 +64,8 @@
 	   src: (~a "/" path))
       path ))
 
+
+(define typesetting-rune-width 50)
 (define (typeset-runes-syntax lang prog-stx)
   (local-require "./indent.rkt")
 
@@ -68,15 +82,15 @@
 
       'data-line: line 
 
-      'data-rune-width: (rune-width)
+      'data-rune-width: typesetting-rune-width
       style: (properties 
 	       display: "inline-block"
 	       position: 'absolute
 
 	       top:  (* line 
-			(* 2 (rune-width)))
+			(* 2 typesetting-rune-width))
 	       left: (* col
-			(rune-width)))
+			typesetting-rune-width))
 
       (id->html lang id) ))
 
@@ -119,4 +133,48 @@
 ;Image can be an html element or a path
 (define (html-rune id elem-or-path)
   (image-binding id elem-or-path))
+
+(define (lines-in prog)
+  (local-require syntax/to-string)
+  (length
+    (string-split 
+      (syntax->string prog)
+      "\n")))
+
+
+(define-syntax-rule (typeset-runes-block lang prog)
+		    (let ([lines
+			    (lines-in #'prog)])
+		      (div 
+			style: 
+			(properties
+			  position: 'relative
+			  padding-bottom: 20
+			  width: "100%"
+			  height: (* 100 lines))
+			(typeset-runes lang prog))))
+
+
+(define-syntax-rule (typeset-rune-inline lang prog)
+		    (span 
+		      style: 
+		      (properties
+			position: 'relative
+			display: 'inline-block
+			vertical-align: 'middle
+			overflow: 'hidden
+			width: 50  
+			height: 50)
+		      (span 
+			style: 
+			(properties
+			  position: 'relative
+			  'transform: "scale(0.5)"
+			  display: 'inline-block
+			  vertical-align: 'middle
+			  width: 100  
+			  height: 100
+			  top: -25  
+			  left: -25  )
+			(typeset-runes lang prog))))
 

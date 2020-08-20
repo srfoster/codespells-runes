@@ -2,7 +2,8 @@
 
 (provide 
   basic-lang
-  (all-from-out "./rune-description-lang.rkt"))
+  (all-from-out "./rune-description-lang.rkt")
+  (all-from-out "./rune-editor.rkt"))
 
 (require (except-in "./rune-description-lang.rkt" q)
 	 "./rune-editor.rkt")
@@ -13,6 +14,7 @@
 		  circle
 		  rectangle
 		  square
+		  text
 		  triangle
 		  above
 		  beside
@@ -70,14 +72,21 @@
     (bool-false)))
 
 (define (open-paren)
+  (letter-C 'cyan)
+
+  #;
   (rotate 90
 	  (triangle 30 'solid 'cyan)))
 
 (define (close-paren)
+  (rotate 180
+	  (letter-C 'cyan))
+
+  #;
   (rotate -90
 	  (triangle 30 'solid 'cyan)))
 
-(define basic-lang
+(define (basic-lang)
   (rune-lang 'basic-lang
 	     (parameterize
 	       ([rune-width 100])
@@ -192,21 +201,26 @@
 
 		 (parameterize ([rune-width 50])
 		   (html-rune 'OPEN-PAREN 
-			      (svg-rune-description
-				(rune-background
-				  #:color "#4169E1"
-				  (rune-image
-				    (scale 0.5
-					   (open-paren)))))))
+			      (div
+				style: (properties padding-top: 25)
+				(svg-rune-description
+
+				  (rune-background
+				    #:color "#4169E1"
+				    (rune-image
+				      (scale 0.5
+					     (open-paren))))))))
 
 		 (parameterize ([rune-width 50])
 		   (html-rune 'CLOSE-PAREN 
-			      (svg-rune-description 
-				(rune-background
-				  #:color "#4169E1"
-				  (rune-image
-				    (scale 0.5
-					   (close-paren)))))))
+			      (div
+				style: (properties padding-top: 25)
+				(svg-rune-description 
+				  (rune-background
+				    #:color "#4169E1"
+				    (rune-image
+				      (scale 0.5
+					     (close-paren))))))))
 		 ))))
 
 (module+ main
@@ -215,7 +229,7 @@
 		 (content
 		   (div
 		     (typeset-runes
-		       basic-lang
+		       (basic-lang)
 		       #;
 		       (not (and (or #t #f)))
 

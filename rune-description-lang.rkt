@@ -3,6 +3,12 @@
 (provide
   half
   svg-rune-description
+  svg-filter
+
+  crunchy
+  crunchier
+  van-gogh
+  blurry
 
   rune-background
   rune-stroke
@@ -16,9 +22,46 @@
 
 (define-syntax-rule (svg-rune-description stuff ...)
   (enclose
+  (svg
+    class: "rune"
+    id: (id 'id)
+    width: (rune-width) 
+    height: (rune-width)
+    'onmouseenter: (call 'distort)
+    'onmouseleave: (call 'unDistort)
+    'viewBox: (~a 
+		(- (/ (rune-width) 10))
+		" " 
+		(- (/ (rune-width) 10))
+		" " 
+		(+ (rune-width) (/ (rune-width) 5))
+		" "
+		(+ (rune-width) (/ (rune-width) 5))) 
+    style: (properties vertical-align: 'middle)
+
+    (defs
+      ((svg-filter) (id 'rune-filter)))
+
+    stuff ...)
+  (script ()
+	  ;TODO: Make a way to configure 
+	  ; the mouseenter/leave effects
+	    (function (distort)
+		      @js{
+		        $("#" + "@(id 'id)".trim())
+			.animate({height: 10 + @(rune-width)}) 
+		      }) 
+	    (function (unDistort)
+		      @js{
+		        $("#" + "@(id 'id)".trim())
+			.animate({height: @(rune-width)}) 
+		      }) 
+	  ))
+
+  #;
+  (enclose
     (svg
       class: "rune"
-      id: (id 'id)
       width: (rune-width) 
       height: (rune-width)
       'onmouseenter: (call 'distort)
@@ -35,11 +78,9 @@
       style: (properties vertical-align: 'middle)
 
       (defs
-	(van-gogh)
-	(crunchy-van-gogh)
-	(blurry))
+	(crunchier-van-gogh))
 
-      stuff ...)
+      stuff )
     (script ()
 	    (function (distort)
 		      @js{
@@ -73,10 +114,10 @@
   (list
     (rect 
       style: (properties 'filter: (~a "url(#"
-				      (id 'crunchy-vg)
+				      (id 'rune-filter)
 				      ")"))
       stroke: color
-      stroke-width: 10
+      stroke-width: 5
       fill: "black"
       rx: 5
       width: size
@@ -112,8 +153,7 @@
   (path
     d: (string-join (map (compose ~a scale-hack)
 			 d-path-args) " ")
-    style: (~a "fill:none;stroke:" color ";stroke-width:5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#"(id 'crunchy-vg)")"
-	       )))
+    style: (~a "fill:none;stroke:" color ";stroke-width:5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#"(id 'rune-filter)")")))
 
 (define (rune-image unscaled-i
 		    #:size [size (rune-width)]) 
@@ -173,26 +213,25 @@
     style: (properties
 	     filter: 
 	     (~a "url(#"
-		 (id 'crunchy-vg)
+		 (id 'rune-filter)
 		 ")"))
     (html->element svg-s ns)))
 
 
 (define (half n) (/ n 2))
 
-(define (blurry)
-  (filter id: (id 'blurry)
+(define (blurry id)
+  (filter id: id
 	  (feGaussianBlur stdDeviation: "1")))
 
-
-(define (van-gogh)
+(define (van-gogh id)
     (filter
        height: 1.3
        width: 1.3
        y: "-0.15000001"
        x: "-0.15000001"
        style: "color-interpolation-filters:sRGB" 
-       id: (id 'vg)
+       id: id 
       (feMorphology
          operator: "dilate"
          radius: "1.5"
@@ -235,14 +274,14 @@
          operator: "over"
          result: "composite2" )))
 
-(define (crunchy-van-gogh)
+(define (crunchy id)
     (filter
        height: "1.3"
        width: "1.3"
        y: "-0.15000001"
        x: "-0.15000001"
        style: "color-interpolation-filters:sRGB"
-       id: (id 'crunchy-vg)
+       id: id
       (feTurbulence
          type: "fractalNoise"
          numOctaves: "3"
@@ -316,3 +355,118 @@
          in: "fbSourceGraphic"
          operator: "over"
          result: "composite2" )))
+
+(define (crunchier id)
+    (filter
+       id: id
+       x: "-0.15000001"
+       width: "1.3"
+       y: "-0.15000001"
+       height: "1.3"
+      (feSpecularLighting
+         in: "SourceAlpha"
+         surfaceScale: "1"
+         specularConstant: "2"
+         specularExponent: "18.5"
+         id: "feSpecularLighting24923"
+        (feDistantLight
+           elevation: "30"
+           azimuth: "225"
+           id: "feDistantLight24921" ))
+      (feComposite
+         result: "result0"
+         operator: "atop"
+         in2: "SourceGraphic"
+         id: "feComposite24925" )
+      (feMorphology
+         radius: "2"
+         result: "result1"
+         in: "SourceAlpha"
+         operator: "dilate"
+         id: "feMorphology24927" )
+      (feComposite
+         in: "result0"
+         in2: "result1"
+         id: "feComposite24929"
+         result: "fbSourceGraphic" )
+      (feColorMatrix
+         result: "fbSourceGraphicAlpha"
+         in: "fbSourceGraphic"
+         values: "0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id: "feColorMatrix24933" )
+      (feTurbulence
+         id: "feTurbulence24935"
+         type: "turbulence"
+         numOctaves: "5"
+         baseFrequency: "0.08 0.175"
+         seed: "25" )
+      (feColorMatrix
+         id: "feColorMatrix24937"
+         result: "result5"
+         values: "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 2 0 " )
+      (feComposite
+         in2: "result5"
+         id: "feComposite24939"
+         in: "fbSourceGraphic"
+         operator: "in" )
+      (feMorphology
+         id: "feMorphology24941"
+         operator: "dilate"
+         radius: "0.65"
+         result: "result3" )
+      (feTurbulence
+         id: "feTurbulence24943"
+         numOctaves: "7"
+         baseFrequency: "0.05 0.09"
+         type: "fractalNoise"
+         seed: "25" )
+      (feGaussianBlur
+         id: "feGaussianBlur24945"
+         stdDeviation: "2"
+         result: "result7" )
+      (feDisplacementMap
+         in2: "result7"
+         id: "feDisplacementMap24947"
+         in: "result3"
+         xChannelSelector: "R"
+         yChannelSelector: "G"
+         scale: "5"
+         result: "result4" )
+      (feFlood
+         id: "feFlood24949"
+         flood-opacity: "1"
+         flood-color: "rgb(255,255,255)"
+         result: "result8" )
+      (feComposite
+         in2: "result4"
+         id: "feComposite24951"
+         k3: "0.7"
+         k1: "0.7"
+         result: "result2"
+         operator: "arithmetic"
+         k2: "0"
+         k4: "0" )
+      (feComposite
+         in2: "fbSourceGraphicAlpha"
+         id: "feComposite24953"
+         k2: "1"
+         in: "result2"
+         operator: "arithmetic"
+         k1: "1"
+         result: "result6"
+         k3: "0"
+         k4: "0" )
+      (feBlend
+         in2: "result6"
+         id: "feBlend24955"
+         mode: "multiply"
+         in: "result6" )) )
+
+(define svg-filter 
+  (make-parameter
+    crunchier))
+
+
+
+
+
