@@ -6,6 +6,7 @@
 	 typeset-rune-inline
 
 	 id->html
+	 id->draggable-rune
 
 	 (struct-out image-binding)
 	 (struct-out rune-lang)
@@ -16,8 +17,7 @@
 	 rune-width)
 
 (require webapp/js
-	 syntax/parse/define
-	 )
+	 syntax/parse/define)
 
 (define rune-width 
   (make-parameter 100))
@@ -60,12 +60,45 @@
     (image-binding-path binding))
 
   (if (path? path)
-      (img width: (rune-width)
+      (img 
+	alt: id
+	width: (rune-width)
 	   src: (~a "/" path))
       path ))
 
 
 (define typesetting-rune-width 50)
+
+(define (id->draggable-rune id lang prog-stx line col)
+
+  (define top
+    (* line 
+       (* 2 typesetting-rune-width)))
+  (define left
+    (* col
+       typesetting-rune-width))
+
+  (span
+
+    'data-stx:  (~a prog-stx) 
+    'data-id:  (cond 
+		 [(eq? id 'OPEN-PAREN) "("]
+		 [(eq? id 'CLOSE-PAREN) ")"]
+		 [else id])
+    'data-col:  col
+    'data-line: line 
+    'data-rune-width: typesetting-rune-width
+
+    class: "rune"
+    style: (properties 
+	     display: "inline-block"
+	     position: 'absolute
+
+	     top: top 
+	     left: left)
+
+    (id->html lang id)))
+
 (define (typeset-runes-syntax lang prog-stx)
   (local-require "./indent.rkt")
 
@@ -73,26 +106,6 @@
   (define col 0)
   (define id 0)
   (define ret '())
-  (define (spanify id)
-    (span
-
-      'data-stx:  (~a prog-stx) 
-
-      'data-col:  col
-
-      'data-line: line 
-
-      'data-rune-width: typesetting-rune-width
-      style: (properties 
-	       display: "inline-block"
-	       position: 'absolute
-
-	       top:  (* line 
-			(* 2 typesetting-rune-width))
-	       left: (* col
-			typesetting-rune-width))
-
-      (id->html lang id) ))
 
   (define sk (->skeleton-f prog-stx))
 
@@ -104,24 +117,24 @@
   (define (line! [x #f]) (if x (set! line x) (set! line (add1 line))))
   (define (id! [x #f]) (if x (set! id x) (set! id (add1 id))))
   (for ([i (string-length bones)])
-	    (define curr-char (substring bones i (add1 i)))
-	    (cond
-	      [(string=? "(" curr-char)
-	       (ret! (spanify 'OPEN-PAREN))
-	       (col!)]
-	      [(string=? ")" curr-char)
-	       (col!)
-	       (ret! (spanify 'CLOSE-PAREN)) ]
-	      [(string=? " " curr-char)
-	       (col!)]
-	      [(string=? "\n" curr-char)
-	       (col! 0)
-	       (line!)]
-	      [(string=? "_" curr-char)
-	       (ret! (spanify (list-ref values id)))
-	       (id!)
-	       (col!)]))
-  
+       (define curr-char (substring bones i (add1 i)))
+       (cond
+	 [(string=? "(" curr-char)
+	  (ret! (id->draggable-rune 'OPEN-PAREN lang prog-stx line col))
+	  (col!)]
+	 [(string=? ")" curr-char)
+	  (col!)
+	  (ret! (id->draggable-rune 'CLOSE-PAREN lang prog-stx line col)) ]
+	 [(string=? " " curr-char)
+	  (col!)]
+	 [(string=? "\n" curr-char)
+	  (col! 0)
+	  (line!)]
+	 [(string=? "_" curr-char)
+	  (ret! (id->draggable-rune (list-ref values id) lang prog-stx line col))
+	  (id!)
+	  (col!)]))
+
   ret)
 
 (define-syntax (typeset-runes stx)

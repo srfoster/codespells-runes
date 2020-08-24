@@ -201,26 +201,22 @@
 
 		 (parameterize ([rune-width 50])
 		   (html-rune 'OPEN-PAREN 
-			      (div
-				style: (properties padding-top: 25)
 				(svg-rune-description
 
 				  (rune-background
 				    #:color "#4169E1"
 				    (rune-image
 				      (scale 0.5
-					     (open-paren))))))))
+					     (open-paren)))))))
 
 		 (parameterize ([rune-width 50])
 		   (html-rune 'CLOSE-PAREN 
-			      (div
-				style: (properties padding-top: 25)
 				(svg-rune-description 
 				  (rune-background
 				    #:color "#4169E1"
 				    (rune-image
 				      (scale 0.5
-					     (close-paren))))))))
+					     (close-paren)))))))
 		 ))))
 
 (module+ main

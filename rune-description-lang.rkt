@@ -23,7 +23,6 @@
 (define-syntax-rule (svg-rune-description stuff ...)
   (enclose
   (svg
-    class: "rune"
     id: (id 'id)
     width: (rune-width) 
     height: (rune-width)
