@@ -18,7 +18,8 @@
 
 (require "./rune-util.rkt"
 	 website/svg
-	 webapp/js)
+	 webapp/js
+	 website-js)
 
 (define-syntax-rule (svg-rune-description stuff ...)
   (enclose
@@ -47,13 +48,23 @@
 	  ; the mouseenter/leave effects
 	    (function (distort)
 		      @js{
-		        $("#" + "@(id 'id)".trim())
-			.animate({height: 10 + @(rune-width)}) 
+		        var elem = @(~j "#NAMESPACE_id")
+		        $(elem)
+			.animate({gray: 50},
+				 {duration: 100,
+				  step: function(now){
+				    $(elem).css({filter: "grayscale(" + now + "%)"})
+				  }})
 		      }) 
 	    (function (unDistort)
 		      @js{
-		        $("#" + "@(id 'id)".trim())
-			.animate({height: @(rune-width)}) 
+		        var elem = @(~j "#NAMESPACE_id")
+		        $(elem)
+			.animate({gray: 0},
+				 {duration: 100,
+				  step: function(now){
+				    $(elem).css({filter: "grayscale(" + now + "%)"})
+				  }})
 		      }) 
 	  ))
 

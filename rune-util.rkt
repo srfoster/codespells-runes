@@ -10,6 +10,7 @@
 
 	 (struct-out image-binding)
 	 (struct-out rune-lang)
+	 rune-lang-ids
 	 append-rune-langs
 	 html-rune
 	 
@@ -27,6 +28,10 @@
 ;  If path, rendered as img tag, else directly dumped
 (struct image-binding (id path))
 (struct rune-lang (name image-bindings))
+
+(define (rune-lang-ids lang)
+  (map image-binding-id
+       (rune-lang-image-bindings lang)))
 
 (define (append-rune-langs l1 l2
 			   #:name [name 'combined])
@@ -55,6 +60,9 @@
       (lambda (b)
 	(eq? id (image-binding-id b)))
       (rune-lang-image-bindings lang)))
+
+  (when (not binding)
+    (error id "No Rune binding"))
 
   (define path
     (image-binding-path binding))
@@ -120,11 +128,11 @@
        (define curr-char (substring bones i (add1 i)))
        (cond
 	 [(string=? "(" curr-char)
-	  (ret! (id->draggable-rune 'OPEN-PAREN lang prog-stx line col))
+	  (ret! (id->draggable-rune '|(| lang prog-stx line col))
 	  (col!)]
 	 [(string=? ")" curr-char)
 	  (col!)
-	  (ret! (id->draggable-rune 'CLOSE-PAREN lang prog-stx line col)) ]
+	  (ret! (id->draggable-rune '|)| lang prog-stx line col)) ]
 	 [(string=? " " curr-char)
 	  (col!)]
 	 [(string=? "\n" curr-char)

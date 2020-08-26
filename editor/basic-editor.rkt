@@ -3,18 +3,23 @@
 (provide 
   store-state
   restore-state
-  rune-surface-component)
+  rune-surface-component
+  rune-surface-height)
 
-(require "./rune-util.rkt"
+(require codespells-runes/rune-util
 	 webapp/js
+	 website-js
 	 (prefix-in html:
 		    (only-in website
 			     script)))
 
+(define rune-surface-height
+  (make-parameter 500))
+
 (define (rune-surface-component 
 	  #:store-state [store-state store-state]
 	  #:restore-state [restore-state restore-state]
-	  lang program)
+	  lang [program #f])
   (enclose
     (div
      class: 'runeContainer
@@ -23,37 +28,49 @@
        "https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
    (div
      id: (id 'runeContainer)
-     ;'onmouseleave: (~a (call 'storeState) ";" (call 'compile))
-     style: (properties width: "100%" height: 500
+     class: 'runeSurface
+     style: (properties width: "100%" height: (rune-surface-height)
 			background-color: "rgba(0,0,0,0.5)"
-			; border: "1px solid black"
-			; border-radius: 10
-			position: "relative"
-			)
+			position: "relative")
 
-     ;TODO: Make work with nested program, or syntax...
-     ;      Maybe program plus whitespace can be the data we store...
-     #;
-     (map (curry id->html lang) program)
-     (typeset-runes-syntax lang program)
+     (when program
+       (typeset-runes-syntax lang program))
      ))
    (script
     ([construct (call 'construct)])
 
-    (function (addRune rf)
+    (function (addRune runeId injectRune x y)
 	      @js{
-	      var r = rf();
+	      var injected = injectRune(document.getElementById(@(~j "NAMESPACE_runeContainer")))
 
-	      @(id 'runeContainer).append(r[0])
-	      @(id 'runeContainer).append(r[1])
+	      $(injected).addClass("rune")
+	      $(injected).attr("data-id", runeId)
+	      $(injected).css(
+			      {display: "inline-block",
+			      position: "absolute",
+			      transform: "translate("+ x + "px," + y +"px)"} ) 
+	      
+              $(injected).attr("data-x", x)
+              $(injected).attr("data-y", y)
 
-	      //var pr = $.parseHTML(r, document, true)
+	      $(injected).contextmenu(
+				      ()=>{
+				      $(injected).remove()
+				      @(call 'compile)
+				      @(call 'storeState)
+				      return false
+				      })
 
-	      //@(id 'runeContainer).append(pr[0])
-	      //@(id 'runeContainer).append(pr[1])
+	      console.log(runeId)
+	      if(runeId == "|(|")
+	        @(call 'addRune "|)|"
+		      (html->js-injector 
+			(id->html lang
+				  '|)|))
+		      @js{x+50} 'y)
 
-	      //console.log(pr)
-	      console.log("Hi")
+	      @(call 'compile)
+	      @(call 'storeState)
 	      })
 
     (function (construct)
@@ -114,6 +131,8 @@
       
       @(call 'compile)
       @(call 'storeState)
+
+      
       })
 
    @(call 'restoreState)
@@ -121,41 +140,43 @@
 
   (function (compile)
             @js{
- var runeImages = Array.prototype.slice.call(document.querySelectorAll("@(id# 'runeContainer) .rune"))
+	    var me = document.getElementById(@(~j "NAMESPACE_runeContainer"))
+	    var runeImages = Array.prototype.slice.call(me.querySelectorAll(":scope > .rune"))
+	    console.log(runeImages)
 
- var sortedRuneImages = runeImages.sort(function (a, b) {
-  var aP = $(a).offset()
-  var bP = $(b).offset()
+	    var sortedRuneImages = runeImages.sort(function (a, b) {
+							    var aP = $(a).offset()
+							    var bP = $(b).offset()
 
-  var aY = aP.top
-  var bY = bP.top
-  var aX = aP.left
-  var bX = bP.left
+							    var aY = aP.top
+							    var bY = bP.top
+							    var aX = aP.left
+							    var bX = bP.left
 
-  if(aY == bY)
-  {
-   return (aX < bX) ? -1 : (aX > bX) ? 1 : 0;
-  }
-  else
-  {
-   return (aY < bY) ? -1 : 1;
-  }
-})
+							    if(aY == bY)
+							    {
+							    return (aX < bX) ? -1 : (aX > bX) ? 1 : 0;
+							    }
+							    else
+							    {
+							    return (aY < bY) ? -1 : 1;
+							    }
+							    })
 
- var grid = function(len,width){
-   var ret = []
+	    var grid = function(len,width){
+	    var ret = []
 
-   for(var i = 0; i < len; i++){
-     var line = Array(width).fill("")
-     ret.push(line)
-   }
+	    for(var i = 0; i < len; i++){
+		    var line = Array(width).fill("")
+		    ret.push(line)
+		    }
 
-   return ret
- }
+		    return ret
+		    }
 
  var lastY = false
  var programGrid = sortedRuneImages.map((i)=>{
-  var alt = i.getAttribute("data-id")                                        
+  var alt = i.getAttribute("data-id").replace(/\|/g,"")
   var p = $(i).offset()
 
   var y = Math.round($(i).offset().top / 50)

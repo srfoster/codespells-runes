@@ -3,10 +3,10 @@
 (provide 
   basic-lang
   (all-from-out "./rune-description-lang.rkt")
-  (all-from-out "./rune-editor.rkt"))
+  (all-from-out "./editor/main.rkt"))
 
 (require (except-in "./rune-description-lang.rkt" q)
-	 "./rune-editor.rkt")
+	 "./editor/main.rkt")
 
 ;A test
 (require webapp/js 
@@ -200,6 +200,16 @@
 				  ))))
 
 		 (parameterize ([rune-width 50])
+		   (html-rune '|(| 
+				(svg-rune-description
+
+				  (rune-background
+				    #:color "#4169E1"
+				    (rune-image
+				      (scale 0.5
+					     (open-paren)))))))
+		   #;
+		 (parameterize ([rune-width 50])
 		   (html-rune 'OPEN-PAREN 
 				(svg-rune-description
 
@@ -209,8 +219,19 @@
 				      (scale 0.5
 					     (open-paren)))))))
 
+		 #;
 		 (parameterize ([rune-width 50])
 		   (html-rune 'CLOSE-PAREN 
+				(svg-rune-description 
+				  (rune-background
+				    #:color "#4169E1"
+				    (rune-image
+				      (scale 0.5
+					     (close-paren)))))))
+
+
+		 (parameterize ([rune-width 50])
+		   (html-rune '|)|
 				(svg-rune-description 
 				  (rune-background
 				    #:color "#4169E1"
@@ -242,7 +263,7 @@
 
 		   (rune-surface-component
 		     basic-lang
-		     '(OPEN-PAREN build small CLOSE-PAREN)))))
+		     '(|(| build small |)|)))))
 
 	 (render (list 
 		   (bootstrap-files)
