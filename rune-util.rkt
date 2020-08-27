@@ -7,10 +7,12 @@
 
 	 id->html
 	 id->draggable-rune
+	 datum->html
 
 	 (struct-out image-binding)
 	 (struct-out rune-lang)
 	 rune-lang-ids
+	 rune-lang-datum-ids 
 	 append-rune-langs
 	 html-rune
 	 
@@ -30,8 +32,14 @@
 (struct rune-lang (name image-bindings))
 
 (define (rune-lang-ids lang)
-  (map image-binding-id
-       (rune-lang-image-bindings lang)))
+  (filter (not/c procedure?)
+	  (map image-binding-id
+	       (rune-lang-image-bindings lang))))
+
+(define (rune-lang-datum-ids lang)
+  (filter procedure?
+	  (map image-binding-id
+	       (rune-lang-image-bindings lang))))
 
 (define (append-rune-langs l1 l2
 			   #:name [name 'combined])
@@ -74,6 +82,22 @@
 	   src: (~a "/" path))
       path ))
 
+(define (datum->html lang datum)
+  (define binding
+    (findf 
+      (lambda (b)
+	(define f? (image-binding-id b))
+	(and (procedure? f?)
+	     (f? datum)))
+      (rune-lang-image-bindings lang)))
+
+  (when (not binding)
+    (error datum "No Rune datum binding"))
+
+  (define func
+    (image-binding-path binding))
+
+  (func datum))
 
 (define typesetting-rune-width 50)
 

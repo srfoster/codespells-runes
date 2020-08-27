@@ -1,10 +1,13 @@
 #lang at-exp racket
 
+;TODO: Make rune-surface-component much simpler.  Things like store/restore should be in wrapping components, like with injection and selection.
+
 (provide 
   store-state
   restore-state
   rune-surface-component
-  rune-surface-height)
+  rune-surface-height
+  demo-editor)
 
 (require codespells-runes/rune-util
 	 webapp/js
@@ -38,6 +41,11 @@
      ))
    (script
     ([construct (call 'construct)])
+
+    (function (currentLanguage)
+	      @js{
+	      return "@(rune-lang-name lang)".trim()  
+	      })
 
     (function (addRune runeId injectRune x y)
 	      @js{
@@ -235,5 +243,39 @@
 
 (define (store-state surface)
   @js{localStorage.setItem("@(id 'lastProgram)", @surface .innerHTML) })
+
+
+
+(define (demo-editor lang [prog-stx #f])
+  (enclose
+    (define out (id 'out))
+    (card-group
+      (card
+	(rune-surface-component 
+	  #:restore-state
+	  (lambda (surface)
+	    @js{
+	    setTimeout(function(){
+			var prog = @(call 'compile)
+			@out .innerHTML = prog
+			}, 1000)
+	    })
+	  #:store-state
+	  (lambda (surface)
+	    @js{
+	    //@(store-state surface)
+	    var prog = @(call 'compile)
+	    @out .innerHTML = prog
+	    })
+	  lang
+	  prog-stx
+	  ))
+      (card
+	(card-body
+	  (card-text
+	    (code
+	      (pre
+		id: (id 'out)))))))
+    (script ())))
 
 

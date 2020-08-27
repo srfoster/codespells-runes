@@ -14,7 +14,7 @@
 		  circle
 		  rectangle
 		  square
-		  text
+		  ;text
 		  triangle
 		  above
 		  beside
@@ -71,27 +71,146 @@
     (rotate 90 (pipe))
     (bool-false)))
 
-(define (open-paren)
-  (letter-C 'cyan)
+(define (open-paren [color 'cyan])
+  (letter-C color))
 
-  #;
-  (rotate 90
-	  (triangle 30 'solid 'cyan)))
-
-(define (close-paren)
+(define (close-paren [color 'cyan])
   (rotate 180
-	  (letter-C 'cyan))
+	  (letter-C color)))
 
-  #;
-  (rotate -90
-	  (triangle 30 'solid 'cyan)))
+(define (open-paren-rune [color 'cyan])
+  (parameterize ([rune-width 50])
+    (svg-rune-description
+      (rune-background
+	#:color "#4169E1"
+	(rune-image
+	  (scale 0.5
+		 (open-paren color)))))))
+
+(define (close-paren-rune [color 'cyan])
+  (parameterize ([rune-width 50])
+    (svg-rune-description 
+      (rune-background
+	#:color "#4169E1"
+	(rune-image
+	  (scale 0.5
+		 (close-paren color)))))))
+
+(define (bool-true-rune)
+  (svg-rune-description
+    (rune-background
+      #:color "#4169E1"
+      (rune-image 
+	(bool-true)))))
+
+(define (bool-false-rune)
+  (svg-rune-description
+    (rune-background
+      #:color "#4169E1"
+      (rune-image 
+	(bool-false)))))
+
+(define (list-rune)
+  (svg-rune-description
+    (rune-background
+      #:color "cyan"
+      (rune-image 
+	(beside
+	  (circle 10 'solid 'green)
+	  (circle 10 'solid 'green)
+	  (circle 10 'solid 'green))))))
+
 
 (define (basic-lang)
-  (rune-lang 'basic-lang
+  (define lang-name 'codespells-runes/basic-lang)
+
+  ;TODO: Probably useful.  Move elsewhere if there's a good place
+  ; Tries to discover if the datum is some provided identifier in the Racket language
+  ; named by lang-name
+  (define (->provided-identifier lang-name datum)
+    (cond
+      [(symbol? datum)
+       (let ()
+	 (define thing (dynamic-require lang-name datum (thunk #f)))
+
+	 datum)]
+      [(procedure? datum)
+       (let ()
+	 (define func-name (object-name datum ))
+
+	 (define thing (dynamic-require lang-name 
+					func-name
+					(thunk #f)))
+	 func-name)]
+      [else #f]
+      ))
+
+  (rune-lang lang-name 
 	     (parameterize
 	       ([rune-width 100])
 	       (list
-		 ;Shouldn't be called svg-rune anymore...
+
+		 (html-rune element?
+			    (lambda (data)
+			      data))
+
+		 (html-rune (curry ->provided-identifier lang-name)
+			    (lambda (data)
+			      ;Assumes that identifiers provided from the Racket lang
+			      ;  are also specified in the Rune lang...
+			      (id->html (basic-lang) 
+					(->provided-identifier lang-name data))))
+
+		 (html-rune string?
+			    (lambda (data)
+			      ;Maybe if provided by language's module, use that rune?
+			      ;  Same with procedure
+			      (local-require website/svg)
+			      (svg-rune-description
+				(rune-background
+				  #:color "turquoise"
+				    (text 
+				      fill: "turquoise"
+				      x: "40%" ;Not sure why this isn't working at 50%.  Border?
+				      y: "40%"
+				      'text-anchor: "middle"
+				      'dominant-baseline: "middle"
+				      (~a "\"" data "\""))))))
+
+		 (html-rune symbol?
+			    (lambda (data)
+			      ;Maybe if provided by language's module, use that rune?
+			      ;  Same with procedure
+			      (local-require website/svg)
+			      (svg-rune-description
+				(rune-background
+				  #:color "lime"
+				    (text 
+				      fill: "lime"
+				      x: "40%" ;Not sure why this isn't working at 50%.  Border?
+				      y: "40%"
+				      'text-anchor: "middle"
+				      'dominant-baseline: "middle"
+				      'font-size: "2em"
+				      (~a "'" data) )
+				  ))))
+
+		 (html-rune boolean?
+			    (lambda (data)
+			      (if data
+				  (bool-true-rune)
+				  (bool-false-rune))))
+
+		 (html-rune list?
+			    (lambda (data)
+			      (list
+				(open-paren-rune)
+				(list-rune)
+				(map
+				  (curry datum->html (basic-lang))	
+				  data)
+				(close-paren-rune))))
+
 		 (html-rune 'build 
 			    (svg-rune-description
 			      (rune-background
@@ -161,19 +280,10 @@
 				  ))))
 
 		 (html-rune '#t
-			    (svg-rune-description
-			      (rune-background
-				#:color "#4169E1"
-				(rune-image 
-				  (bool-true) 
-				  ))))
+			    (bool-true-rune))
 
 		 (html-rune '#f
-			    (svg-rune-description
-			      (rune-background
-				#:color "#4169E1"
-				(rune-image 
-				  (bool-false) ))))
+			    (bool-false-rune))
 
 		 (html-rune 'A
 			    (svg-rune-description
@@ -199,45 +309,15 @@
 				  (letter-C)
 				  ))))
 
-		 (parameterize ([rune-width 50])
+		 (html-rune 'list
+			    (list-rune))
+
 		   (html-rune '|(| 
-				(svg-rune-description
+				  (open-paren-rune)
+				)
 
-				  (rune-background
-				    #:color "#4169E1"
-				    (rune-image
-				      (scale 0.5
-					     (open-paren)))))))
-		   #;
-		 (parameterize ([rune-width 50])
-		   (html-rune 'OPEN-PAREN 
-				(svg-rune-description
-
-				  (rune-background
-				    #:color "#4169E1"
-				    (rune-image
-				      (scale 0.5
-					     (open-paren)))))))
-
-		 #;
-		 (parameterize ([rune-width 50])
-		   (html-rune 'CLOSE-PAREN 
-				(svg-rune-description 
-				  (rune-background
-				    #:color "#4169E1"
-				    (rune-image
-				      (scale 0.5
-					     (close-paren)))))))
-
-
-		 (parameterize ([rune-width 50])
 		   (html-rune '|)|
-				(svg-rune-description 
-				  (rune-background
-				    #:color "#4169E1"
-				    (rune-image
-				      (scale 0.5
-					     (close-paren)))))))
+				(close-paren-rune))
 		 ))))
 
 (module+ main
