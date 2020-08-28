@@ -229,9 +229,30 @@
 			    (svg-rune-description
 			      (rune-background
 				#:color "#DA70D6"
-				(rune-stroke
-				  #:color "#DA70D6"
-				  M 10 25 h 30 v 2 h -30))))
+				(rune-image
+				  (above
+				    (rectangle 50 5 'solid 'pink))))))
+
+		 (html-rune 'medium 
+			    (svg-rune-description
+			      (rune-background
+				#:color "#DA70D6"
+				(rune-image
+				  (above
+				    (rectangle 50 5 'solid 'pink)
+				    (square 10 'solid 'transparent)
+				    (rectangle 50 5 'solid 'pink))))))
+		 (html-rune 'large 
+			    (svg-rune-description
+			      (rune-background
+				#:color "#DA70D6"
+				(rune-image
+				  (above
+				    (rectangle 50 5 'solid 'pink)
+				    (square 10 'solid 'transparent)
+				    (rectangle 50 5 'solid 'pink)
+				    (square 10 'solid 'transparent)
+				    (rectangle 50 5 'solid 'pink))))))
 
 		 (html-rune 'define 
 			    (svg-rune-description

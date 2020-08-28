@@ -1,12 +1,10 @@
 #lang racket
 
 (provide
-  build small
+  build small medium large
   (all-from-out racket))
 
-;build? small? medium?  Etc??
-;  These are specific to codespells. 
-;  Or we provide default defs, and they can be overriden?
+;Provide some minimal identifiers so that some basic spells work out of the box
 ; TODO: Should this whole (basic-lang) go in a different package??   I think so...
 
 (define (build size)
@@ -16,3 +14,5 @@
     (source src: "https://codespells.org/videos/build-sphere-demo.webm")))
 
 (define small 'small)
+(define medium 'medium)
+(define large 'large)
