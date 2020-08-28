@@ -230,8 +230,7 @@
 			      (rune-background
 				#:color "#DA70D6"
 				(rune-image
-				  (above
-				    (rectangle 50 5 'solid 'pink))))))
+				  (rectangle 50 5 'solid 'pink)))))
 
 		 (html-rune 'medium 
 			    (svg-rune-description
