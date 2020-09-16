@@ -2,8 +2,6 @@
 
 (provide 
   basic-lang
-  close-paren-rune
-  open-paren-rune
   (all-from-out "./rune-description-lang.rkt")
   (all-from-out "./editor/main.rkt"))
 

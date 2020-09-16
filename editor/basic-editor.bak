@@ -29,7 +29,6 @@
      (html:script
        src:
        "https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
-     
    (div
      id: (id 'runeContainer)
      class: 'runeSurface
@@ -53,11 +52,7 @@
 	      var injected = injectRune(document.getElementById(@(~j "NAMESPACE_runeContainer")))
 
 	      $(injected).addClass("rune")
-
-              //Editor runes will always set their own values
-              if(!runeId.includes("editor:"))
-	        $(injected).attr("data-id", runeId)
-              
+	      $(injected).attr("data-id", runeId)
 	      $(injected).css(
 			      {display: "inline-block",
 			      position: "absolute",
