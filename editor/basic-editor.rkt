@@ -45,7 +45,9 @@
 
     (function (currentLanguage)
 	      @js{
-	      return "@(rune-lang-name lang)".trim()  
+	      return "@(if (path? (rune-lang-name lang))
+                           (string-replace (~a (rune-lang-name lang)) "\\" "\\\\") ;preserves racket paths with backslashes
+                           (rune-lang-name lang))".trim()  
 	      })
 
     (function (addRune runeId injectRune x y)

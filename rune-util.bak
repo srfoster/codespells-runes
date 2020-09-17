@@ -28,8 +28,8 @@
 
 ;A path is either a path or an element...
 ;  If path, rendered as img tag, else directly dumped
-(struct image-binding (id path) #:transparent)
-(struct rune-lang (name image-bindings) #:transparent)
+(struct image-binding (id path))
+(struct rune-lang (name image-bindings))
 
 (define (rune-lang-ids lang)
   (filter (not/c procedure?)
@@ -43,7 +43,6 @@
 
 (define (append-rune-langs l1 l2
 			   #:name [name 'combined])
-
   (rune-lang name
 	     (append
 	       (rune-lang-image-bindings l1)

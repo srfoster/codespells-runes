@@ -29,6 +29,7 @@
      (html:script
        src:
        "https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
+     
    (div
      id: (id 'runeContainer)
      class: 'runeSurface
@@ -44,7 +45,9 @@
 
     (function (currentLanguage)
 	      @js{
-	      return "@(rune-lang-name lang)".trim()  
+	      return "@(if (string? (rune-lang-name lang))
+                           (string-replace (rune-lang-name lang))
+                           (rune-lang-name lang))".trim()  
 	      })
 
     (function (addRune runeId injectRune x y)
@@ -52,7 +55,11 @@
 	      var injected = injectRune(document.getElementById(@(~j "NAMESPACE_runeContainer")))
 
 	      $(injected).addClass("rune")
-	      $(injected).attr("data-id", runeId)
+
+              //Editor runes will always set their own values
+              if(!runeId.includes("editor:"))
+	        $(injected).attr("data-id", runeId)
+              
 	      $(injected).css(
 			      {display: "inline-block",
 			      position: "absolute",
