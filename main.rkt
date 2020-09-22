@@ -4,6 +4,7 @@
   basic-lang
   close-paren-rune
   open-paren-rune
+  rune-list
   (all-from-out "./rune-description-lang.rkt")
   (all-from-out "./editor/main.rkt"))
 
@@ -25,6 +26,18 @@
 		  scale
 		  rotate
 		  ))
+
+(define (rune-list #:with-paren-runes? [with-paren-runes? #f] . runes)
+  (append          
+   (if with-paren-runes?
+       (list
+        (html-rune '|(| 
+                   (open-paren-rune))
+
+        (html-rune '|)|
+                   (close-paren-rune)))
+       (list))
+   runes))
 
 (define (square-donut [color 'cyan])
   (overlay
