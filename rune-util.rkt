@@ -14,6 +14,7 @@
 	 rune-lang-ids
 	 rune-lang-datum-ids 
 	 append-rune-langs
+         add-rune-to-lang
 	 html-rune
 	 
 	 ;Styling
@@ -41,13 +42,16 @@
 	  (map image-binding-id
 	       (rune-lang-image-bindings lang))))
 
-(define (append-rune-langs l1 l2
-			   #:name [name 'combined])
+(define (append-rune-langs #:name [name 'combined]
+                           . ls)
 
   (rune-lang name
-	     (append
-	       (rune-lang-image-bindings l1)
-	       (rune-lang-image-bindings l2))))
+	     (apply append
+                    (map rune-lang-image-bindings ls))))
+
+(define (add-rune-to-lang r lang)
+  (rune-lang (rune-lang-name lang)
+             (cons r (rune-lang-image-bindings lang))))
 
 
 (define padding 50)
