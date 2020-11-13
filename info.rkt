@@ -1,6 +1,6 @@
 #lang info
 (define collection "codespells-runes")
-(define deps '("base"))
+(define deps '("base" "http-easy"))
 (define build-deps '("scribble-lib" "racket-doc" "rackunit-lib"))
 (define scribblings '(("scribblings/codespells-runes.scrbl" ())))
 (define pkg-desc "Description Here")
