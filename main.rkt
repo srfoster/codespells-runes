@@ -6,11 +6,13 @@
   open-paren-rune
   rune-list
   (all-from-out "./rune-description-lang.rkt")
+  (all-from-out "./image-helpers.rkt")
   (all-from-out "./editor/main.rkt"))
 
 (require (except-in "./rune-description-lang.rkt" q)
 	 "./editor/main.rkt"
-         "./widgets/main.rkt")
+         "./widgets/main.rkt"
+         "./image-helpers.rkt")
 
 ;A test
 (require webapp/js 
@@ -38,61 +40,6 @@
                    (close-paren-rune)))
        (list))
    runes))
-
-(define (square-donut [color 'cyan])
-  (overlay
-    (square 20 'solid 'black)
-    (square 40 'solid color)))
-
-(define (pipe [color 'cyan])
-  (rectangle 5 100 'solid color))
-
-(define (letter-C [color 'yellow])
-  (overlay
-    (beside
-      (square 10 'solid 'transparent)
-      (circle 20 'solid 'black))
-    (circle 25 'solid color)))
-
-(define (clover i) 
-  (above 
-    (beside i i)
-    (beside i i)))
-
-(define (bool-true)
-  (circle 20 'solid 'magenta))
-
-(define (bool-false)
-  (circle 20 'outline 'magenta))
-
-(define (and-desc)
-  (above
-    (beside 
-      (bool-true)
-      (bool-false))
-    (rotate 90 (pipe))
-    (bool-false)))
-
-(define (or-desc)
-  (above
-    (beside 
-      (bool-true)
-      (bool-false))
-    (rotate 90 (pipe))
-    (bool-true)))
-
-(define (not-desc)
-  (above
-    (bool-true)
-    (rotate 90 (pipe))
-    (bool-false)))
-
-(define (open-paren [color 'cyan])
-  (letter-C color))
-
-(define (close-paren [color 'cyan])
-  (rotate 180
-	  (letter-C color)))
 
 (define (open-paren-rune [color 'cyan])
   (parameterize ([rune-width 50])

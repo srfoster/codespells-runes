@@ -3,6 +3,7 @@
 (provide string-rune-widget
          (rename-out [raw-code-rune-widget modal-editor-rune-widget]) ;Use this name instead of raw-code-rune-widget now
          raw-code-rune-widget
+         editor-component
          )
 
 (require website-js

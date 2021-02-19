@@ -185,11 +185,14 @@
   (image-binding id elem-or-path))
 
 (define (lines-in prog)
-  (local-require syntax/to-string)
-  (length
-    (string-split 
-      (syntax->string prog)
-      "\n")))
+  (local-require syntax/to-string
+                 syntax/stx)
+  (if (stx-list? prog)
+      (length
+       (string-split 
+        (syntax->string prog)
+        "\n"))
+      1))
 
 
 (define-syntax-rule (typeset-runes-block lang prog)
