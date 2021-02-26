@@ -78,7 +78,9 @@
 	   (script ([construct (call 'constructor)])
 		   (function (constructor)
 			     @js{
+			     $(@(~j "#~a" (id 'toolboxManager))).click((e)=>{if(e.shiftKey){@(call 'showToolbox 'e)}})
 			     $(@(~j "#~a" (id 'toolboxManager))).dblclick((e)=>@(call 'showToolbox 'e))
+                             
 			     $(@(~j "#~a" runeBox)).contextmenu(()=>@(call 'hideToolbox))
 			     })
 		   (function (showToolbox event)

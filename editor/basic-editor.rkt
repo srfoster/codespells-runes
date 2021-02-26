@@ -26,6 +26,7 @@
   (enclose
     (div
      class: 'runeContainer
+     'oncontextmenu: "return false;" 
      (html:script
        src:
        "https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
